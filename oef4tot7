@@ -1,0 +1,63 @@
+oef 4
+    select gene_name, seq_region_end - seq_region_start as size from gene order by seq_region_end - seq_region_start desc limit 3;
+    -> PARP1
+
+
+oef5 
+Give the name of the gene with the most exons? Give the number of exons of this gene?
+X
+    select gene_name, gene_id from gene
+    join transcript on gene.gene_id = transcript.gene_id and gene.seq_region_start = transcript_id.seq_region_start
+    join exon_transcript on exon_transcript.transcript_id = transcript.transcript_id
+    join exon on exon.exon_id = exon_transcript.exon_id;
+
+    via seq:
+    select count(exon_id) from exon
+    join gene on gene.seq_
+
+
+oef6
+Give the name of the chromosome with the most genes associated with breast cancer. Give the number of transcripts of this chromosome? (2 queries)
+    select chromosome, count(chromosome) from gene where description like "%breast cancer%" group by chromosome limit 1;
+    -> chromosome 16
+    select chromosome, count(transcript.transcript_id) from gene join transcript on gene.gene_id = transcript.gene_id group by gene.chromosome limit 1 offset 7 ;
+    -> 3636
+
+oef7
+Give the number of rows from the exon table and do the same for the exon_transcript table (2 queries). Explain why there is a difference in number of rows.
+    select count(*) from exon;
+    -> 642590
+    select count(*) from exon_transcript;
+    -> 1178393 
+    Because it is a cross-reference table which acts as a many-to-many relationship between exon table and transcript table. One exon can have many transcripts, because of multiple splicing
+
+
+gene
++---------+---------+------------+------------------+----------------+-------------------+------------+---------+--------+-------------+
+| gene_id | biotype | chromosome | seq_region_start | seq_region_end | seq_region_strand | gene_name  | source  | status | description |
++---------+---------+------------+------------------+----------------+-------------------+------------+---------+--------+-------------+
+|   76121 | lincRNA | 15         |         32898619 |       32907361 |                -1 | AC123768.6 | ensembl | NOVEL  | NULL        |
++---------+---------+------------+------------------+----------------+-------------------+------------+---------+--------+-------------+µ
+
+exon
++---------+------------------+----------------+-------------------+-------+-----------+
+| exon_id | seq_region_start | seq_region_end | seq_region_strand | phase | end_phase |
++---------+------------------+----------------+-------------------+-------+-----------+
+|  910175 |         32906638 |       32907361 |                -1 |    -1 |        -1 |
++---------+------------------+----------------+-------------------+-------+-----------+
+
+exon_transcript
++---------+---------------+------+
+| exon_id | transcript_id | rank |
++---------+---------------+------+
+|  910175 |        221260 |    1 |
++---------+---------------+------+
+
+transcript
++---------------+---------+------------------+----------------+-------------------+---------+--------+-------------+
+| transcript_id | gene_id | seq_region_start | seq_region_end | seq_region_strand | biotype | status | description |
++---------------+---------+------------------+----------------+-------------------+---------+--------+-------------+
+|        221260 |   76121 |         32898619 |       32907361 |                -1 | lincRNA | NOVEL  | NULL        |
++---------------+---------+------------------+----------------+-------------------+---------+--------+-------------+
+
+
